@@ -1,0 +1,6 @@
+{
+  "name": "Tech & AI News",
+  "description": "A dynamic, configurable news aggregator for tech and AI news.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
