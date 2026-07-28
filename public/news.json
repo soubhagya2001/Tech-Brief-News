@@ -1,0 +1,38 @@
+[
+  {
+    "id": "sample-tech-1",
+    "title": "AI assistants are reshaping daily work for modern teams",
+    "link": "https://example.com/ai-assistants",
+    "pubDate": "2026-07-28T09:00:00.000Z",
+    "contentSnippet": "Teams are adopting copilots and automation tools to speed up research, writing, and support work.",
+    "category": "Technology",
+    "source": "Sample Feed"
+  },
+  {
+    "id": "sample-ai-1",
+    "title": "Open-source models are closing the gap with proprietary platforms",
+    "link": "https://example.com/open-source-models",
+    "pubDate": "2026-07-27T16:30:00.000Z",
+    "contentSnippet": "Developers are finding that open-weight models are becoming practical for real-world product experiments.",
+    "category": "Artificial Intelligence",
+    "source": "Sample Feed"
+  },
+  {
+    "id": "sample-programming-1",
+    "title": "Modern frontend tooling is making build pipelines much faster",
+    "link": "https://example.com/frontend-tooling",
+    "pubDate": "2026-07-27T12:15:00.000Z",
+    "contentSnippet": "Improved caching, simpler bundling, and instant previews are helping teams ship with less friction.",
+    "category": "Programming",
+    "source": "Sample Feed"
+  },
+  {
+    "id": "sample-startups-1",
+    "title": "Small teams are turning AI agents into focused products",
+    "link": "https://example.com/ai-agent-products",
+    "pubDate": "2026-07-26T18:45:00.000Z",
+    "contentSnippet": "Founders are building lightweight AI products that solve one specific workflow well instead of trying to do everything.",
+    "category": "Startups",
+    "source": "Sample Feed"
+  }
+]
