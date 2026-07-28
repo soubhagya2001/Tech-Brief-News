@@ -18,6 +18,76 @@ const FALLBACK_CONFIG: AppConfig = {
 
 const getConfigUrl = () => `${import.meta.env.BASE_URL}config.json`;
 
+const PUBLIC_FEED_ENDPOINTS = [
+  (feedUrl: string) => `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`,
+  (feedUrl: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(feedUrl)}`,
+  (feedUrl: string) => `https://r.jina.ai/http/${encodeURIComponent(feedUrl)}`,
+];
+
+const normalizeFeedItem = (item: any, categoryName: string, sourceName: string): NewsItem => ({
+  id: item.guid || item.id || item.link || `${categoryName}-${sourceName}-${item.title}`,
+  title: item.title || "Untitled",
+  link: item.link || "#",
+  pubDate: item.pubDate || item.published || "",
+  contentSnippet: item.contentSnippet || item.description || item.content || "",
+  category: categoryName,
+  source: sourceName,
+});
+
+const parseAllOriginsFeed = (feedText: string, categoryName: string): NewsItem[] => {
+  if (typeof window === "undefined") return [];
+
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(feedText, "application/xml");
+  const sourceName = doc.querySelector("channel > title")?.textContent || "Public Feed";
+  const items = Array.from(doc.querySelectorAll("item"));
+
+  return items.map((item) => ({
+    id: item.querySelector("guid")?.textContent || item.querySelector("link")?.textContent || `${categoryName}-${sourceName}`,
+    title: item.querySelector("title")?.textContent || "Untitled",
+    link: item.querySelector("link")?.textContent || "#",
+    pubDate: item.querySelector("pubDate")?.textContent || "",
+    contentSnippet: item.querySelector("description")?.textContent?.replace(/<[^>]+>/g, "").trim() || "",
+    category: categoryName,
+    source: sourceName,
+  }));
+};
+
+const fetchFeedFromPublicApis = async (feedUrl: string, categoryName: string): Promise<NewsItem[]> => {
+  for (const buildUrl of PUBLIC_FEED_ENDPOINTS) {
+    try {
+      const url = buildUrl(feedUrl);
+      const response = await fetch(url, { headers: { Accept: "application/json, application/xml, text/xml, text/plain" } });
+      if (!response.ok) continue;
+
+      if (url.includes("rss2json")) {
+        const payload = await response.json();
+        const items = Array.isArray(payload?.items) ? payload.items : [];
+        const sourceName = payload?.feed?.title || "Public Feed";
+        return items.map((item: any) => normalizeFeedItem(item, categoryName, sourceName));
+      }
+
+      const text = await response.text();
+      if (text && text.includes("<rss") || text.includes("<feed") || text.includes("<channel")) {
+        return parseAllOriginsFeed(text, categoryName);
+      }
+
+      try {
+        const payload = JSON.parse(text);
+        if (payload?.contents) {
+          return parseAllOriginsFeed(payload.contents, categoryName);
+        }
+      } catch {
+        // ignore
+      }
+    } catch (err) {
+      console.warn(`Failed to load feed ${feedUrl}`, err);
+    }
+  }
+
+  return [];
+};
+
 const getStoredConfig = (): AppConfig | null => {
   if (typeof window === "undefined") return null;
 
@@ -64,10 +134,36 @@ export default function App() {
   };
 
   const fetchNews = async () => {
+    if (!config) return;
+
     setLoading(true);
-    setNews([]);
-    setError("This static deployment only loads configuration from public/config.json. Live RSS news requires a server or serverless API.");
-    setLoading(false);
+    setError("");
+
+    try {
+      const activeCategories = config.categories.filter((category) => category.enabled);
+      const feedResults = await Promise.all(
+        activeCategories.flatMap((category) =>
+          category.feeds.map((feedUrl) => fetchFeedFromPublicApis(feedUrl, category.name))
+        )
+      );
+
+      const allNews = feedResults.flat().sort((a, b) => {
+        const aTime = new Date(a.pubDate).getTime();
+        const bTime = new Date(b.pubDate).getTime();
+        return (Number.isNaN(bTime) ? 0 : bTime) - (Number.isNaN(aTime) ? 0 : aTime);
+      });
+
+      setNews(allNews.slice(0, 100));
+      if (allNews.length === 0) {
+        setError("No public feeds were available at the moment.");
+      }
+    } catch (err) {
+      console.error("Failed to load public news", err);
+      setNews([]);
+      setError("Unable to load public news feeds right now.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -78,7 +174,7 @@ export default function App() {
     if (config) {
       fetchNews();
     }
-  }, [config?.categories]);
+  }, [config]);
 
   const saveConfig = async (newConfig: AppConfig) => {
     try {
