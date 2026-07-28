@@ -11,6 +11,24 @@ const THEME_COLORS = [
   { name: "Slate", value: "slate", classes: "bg-slate-800 hover:bg-slate-900 text-slate-800 ring-slate-800 border-slate-800" },
 ];
 
+const FALLBACK_CONFIG: AppConfig = {
+  themeColor: "indigo",
+  categories: [{ id: "tech", name: "Technology", enabled: true, feeds: [] }],
+};
+
+const getConfigUrl = () => `${import.meta.env.BASE_URL}config.json`;
+
+const getStoredConfig = (): AppConfig | null => {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const saved = window.localStorage.getItem("tech-brief-config");
+    return saved ? JSON.parse(saved) as AppConfig : null;
+  } catch {
+    return null;
+  }
+};
+
 export default function App() {
   const [config, setConfig] = useState<AppConfig | null>(null);
   const [news, setNews] = useState<NewsItem[]>([]);
@@ -21,30 +39,35 @@ export default function App() {
   const [activeCategory, setActiveCategory] = useState<string>("All");
 
   const fetchConfig = async () => {
+    setLoading(true);
+    setError("");
+
     try {
-      const res = await fetch("/api/config");
+      const storedConfig = getStoredConfig();
+      if (storedConfig) {
+        setConfig(storedConfig);
+        return;
+      }
+
+      const res = await fetch(getConfigUrl());
+      if (!res.ok) throw new Error("Config file unavailable");
+
       const data = await res.json();
       setConfig(data);
     } catch (err) {
       console.error("Failed to load config", err);
-      setError("Failed to load configuration");
+      setConfig(FALLBACK_CONFIG);
+      setError("Using built-in settings because the config file could not be loaded.");
+    } finally {
+      setLoading(false);
     }
   };
 
   const fetchNews = async () => {
     setLoading(true);
-    setError("");
-    try {
-      const res = await fetch("/api/news");
-      if (!res.ok) throw new Error("Failed to fetch news");
-      const data = await res.json();
-      setNews(data);
-    } catch (err) {
-      console.error(err);
-      setError("Failed to fetch news feeds");
-    } finally {
-      setLoading(false);
-    }
+    setNews([]);
+    setError("This static deployment only loads configuration from public/config.json. Live RSS news requires a server or serverless API.");
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -59,11 +82,9 @@ export default function App() {
 
   const saveConfig = async (newConfig: AppConfig) => {
     try {
-      await fetch("/api/config", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newConfig),
-      });
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("tech-brief-config", JSON.stringify(newConfig));
+      }
       setConfig(newConfig);
       setIsSettingsOpen(false);
     } catch (err) {
