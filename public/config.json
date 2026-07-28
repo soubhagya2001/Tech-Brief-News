@@ -1,0 +1,87 @@
+{
+  "themeColor": "indigo",
+  "categories": [
+    {
+      "id": "tech",
+      "name": "Technology",
+      "enabled": true,
+      "feeds": [
+        "https://techcrunch.com/feed/",
+        "https://www.theverge.com/rss/index.xml",
+        "https://feeds.arstechnica.com/arstechnica/index"
+      ]
+    },
+    {
+      "id": "ai",
+      "name": "Artificial Intelligence",
+      "enabled": true,
+      "feeds": [
+        "https://www.artificialintelligence-news.com/feed/",
+        "https://venturebeat.com/category/ai/feed/"
+      ]
+    },
+    {
+      "id": "programming",
+      "name": "Programming",
+      "enabled": true,
+      "feeds": [
+        "https://dev.to/feed",
+        "https://www.freecodecamp.org/news/rss/"
+      ]
+    },
+    {
+      "id": "startups",
+      "name": "Startups",
+      "enabled": true,
+      "feeds": [
+        "https://news.ycombinator.com/rss",
+        "https://www.entrepreneur.com/latest.rss"
+      ]
+    },
+    {
+      "id": "science",
+      "name": "Science",
+      "enabled": false,
+      "feeds": [
+        "https://www.sciencedaily.com/rss/all.xml",
+        "https://www.wired.com/feed/category/science/latest/rss"
+      ]
+    },
+    {
+      "id": "space",
+      "name": "Space & Astronomy",
+      "enabled": false,
+      "feeds": [
+        "https://www.space.com/feeds/all",
+        "https://spacenews.com/feed/"
+      ]
+    },
+    {
+      "id": "gaming",
+      "name": "Gaming",
+      "enabled": false,
+      "feeds": [
+        "https://www.polygon.com/rss/index.xml",
+        "https://www.ign.com/rss/articles/feed"
+      ]
+    },
+    {
+      "id": "cybersecurity",
+      "name": "Cybersecurity",
+      "enabled": false,
+      "feeds": [
+        "https://krebsonsecurity.com/feed/",
+        "https://thehackernews.com/feeds/posts/default"
+      ]
+    },
+    {
+      "id": "crypto",
+      "name": "Cryptocurrency",
+      "enabled": false,
+      "feeds": [
+        "https://cointelegraph.com/rss",
+        "https://www.coindesk.com/arc/outboundfeeds/rss/"
+      ]
+    }
+  ]
+}
