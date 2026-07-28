@@ -5,6 +5,8 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: ["Deployment"]
+  pull_request:
+    branches: ["Deployment"]
   workflow_dispatch:
 
 permissions:
@@ -38,8 +40,9 @@ jobs:
         with:
           path: ./dist
 
-  # Deployment job
+  # Deployment job (only on push/merge, not on PR)
   deploy:
+    if: github.event_name == 'push'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
